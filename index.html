@@ -394,6 +394,7 @@ echo "Optimization complete. Restart your Mac for full effect."</pre>
       const code = document.getElementById(id).innerText;
       navigator.clipboard.writeText(code).then(()=>alert('✅ Script copied!'));
     }
+
     function downloadScript(id, filename){
       const code = document.getElementById(id).innerText;
       const blob = new Blob([code], {type: 'text/plain'});
