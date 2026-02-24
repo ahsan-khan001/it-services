@@ -348,8 +348,20 @@ powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61</pre>
       </div>
     </details>
 <!-- --- .......................................Work Space ...................................................................... -->
+        <details>
+      <summary>Clear DNS, Temp, and Cache</summary>
+      <pre class="language-powershell" id="script2">ipconfig /flushdns
+Remove-Item "$env:TEMP\*" -Recurse -Force
+Clear-RecycleBin -Force</pre>
+      <div class="buttons">
+        <button class="copy-btn" onclick="copyScript('script2')">📋 Copy</button>
+        <button class="download-btn" onclick="downloadScript('script2','ClearDNS_Temp.ps1')">⬇️ Download</button>
+      </div>
+    </details>
+
+<!-- --- .......................................Work Space ...................................................................... -->
 <details>
-      <summary>MAC Optimizations </summary>
+      <summary> XYZ  </summary>
       <pre class="language-powershell" id="script2">echo "<0001f9f0> Cleaning up temporary files..."
 sudo rm -rf /private/var/tmp/* 2>/dev/null
 sudo rm -rf /private/tmp/* 2>/dev/null
@@ -407,3 +419,4 @@ echo "Optimization complete. Restart your Mac for full effect."</pre>
   </script>
 </body>
 </html>
+
