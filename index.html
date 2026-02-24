@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Windows Optimization Scripts</title>
+
+  <!-- Prism.js CSS for syntax highlighting -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-color: #f9fafb;
+      --container-bg: #ffffff;
+      --text-color: #111827;
+      --border-color: #d1d5db;
+      --accent: #2563eb;
+      --hover-accent: #1d4ed8;
+      --box-bg: #f3f4f6;
+      --shadow: rgba(0,0,0,0.1);
+    }
+
+    body.dark {
+      --bg-color: #0f172a;
+      --container-bg: #1e293b;
+      --text-color: #e2e8f0;
+      --border-color: #334155;
+      --accent: #60a5fa;
+      --hover-accent: #3b82f6;
+      --box-bg: #1a2a45;
+      --shadow: rgba(0,0,0,0.6);
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 40px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .toggle-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--accent);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      z-index: 1000;
+    }
+
+    .toggle-btn:hover { background-color: var(--hover-accent); }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--container-bg);
+      border-radius: 12px;
+      padding: 25px 35px;
+      box-shadow: 0 4px 20px var(--shadow);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h1 { text-align: center; color: var(--accent); margin-bottom: 25px; }
+
+    details {
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--box-bg);
+      padding: 10px 15px;
+      overflow: hidden;
+      transition: all 0.3s ease-in-out;
+    }
+
+    summary {
+      font-weight: 600;
+      cursor: pointer;
+      list-style: none;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+    }
+
+    summary::before {
+      content: "▶";
+      font-size: 13px;
+      margin-right: 8px;
+      color: var(--accent);
+      transition: transform 0.3s;
+    }
+
+    details[open] summary::before { content: "▼"; }
+
+    pre {
+      background: none !important;
+      border: none !important;
+      overflow-x: auto;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 500; /* Slightly bolder for crispness */
+      color: #111827; /* Dark text for light mode */
+      text-shadow: 0 0 1px rgba(0,0,0,0.2); /* Subtle shadow for clarity */
+    }
+
+    body.dark pre {
+      color: #e2e8f0;
+      text-shadow: none; /* No shadow needed in dark mode */
+    }
+
+    /* Fix Prism.js faded text in light mode */
+    body:not(.dark) pre[class*="language-"] {
+      color: #111827 !important;
+    }
+    body:not(.dark) .token.comment,
+    body:not(.dark) .token.punctuation,
+    body:not(.dark) .token.operator,
+    body:not(.dark) .token.keyword,
+    body:not(.dark) .token.function,
+    body:not(.dark) .token.string {
+      opacity: 1 !important;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .copy-btn, .download-btn {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: bold;
+      color: white;
+      background-color: var(--accent);
+      transition: background-color 0.3s;
+    }
+
+    .copy-btn:hover, .download-btn:hover { background-color: var(--hover-accent); }
+
+    .footer { text-align: center; margin-top: 30px; color: var(--text-color); font-size: 13px; opacity: 0.8; }
+    .author { font-weight: 500; color: var(--accent); }
+
+    @media (max-width: 600px) {
+      body { padding: 20px; }
+      .container { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <button class="toggle-btn" onclick="toggleDarkMode()">🌙 Toggle Dark/Light Mode</button>
+
+  <div class="container">
+    <h1>Team Carm Cyril - Powershell Toolkit</h1>
+
+    <details>
+      <summary>Windows 11 Performance Optimizer</summary>
+      <pre class="language-powershell" id="script1">Write-Host "Starting Windows 11 performance optimization..." -ForegroundColor Cyan
+
+# --- Step 1: Clean temporary and cache files ---
+Write-Host "`nCleaning temporary files..." -ForegroundColor Yellow
+$paths = @(
+    "$env:TEMP\*",
+    "$env:WINDIR\Temp\*",
+    "$env:LOCALAPPDATA\Microsoft\Windows\WebCache\*",
+    "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default\Cache\*",
+    "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache\*",
+    "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles\*\cache2\entries\*"
+)
+foreach ($p in $paths) {
+    if (Test-Path $p) {
+        Remove-Item $p -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+Write-Host "Temporary and cache files cleaned."
+
+# --- Step 2: Disable unnecessary startup apps ---
+Write-Host "`nDisabling startup apps..." -ForegroundColor Yellow
+try {
+    Get-CimInstance Win32_StartupCommand | ForEach-Object {
+        Write-Host "Disabling startup entry: $($_.Name)"
+        Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name $_.Name -ErrorAction SilentlyContinue
+    }
+} catch {
+    Write-Host "Could not modify startup items. Try running PowerShell as Administrator." -ForegroundColor DarkYellow
+}
+Write-Host "Startup apps disabled (non-critical)."
+
+# --- Step 3: Apply "Adjust for Best Performance" visual settings ---
+Write-Host "`nApplying 'Adjust for Best Performance' settings..." -ForegroundColor Yellow
+
+$visualEffectsKeys = @(
+    "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects",
+    "HKCU:\Software\Microsoft\Windows\DWM",
+    "HKCU:\Control Panel\Desktop",
+    "HKCU:\Control Panel\Desktop\WindowMetrics",
+    "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+)
+
+foreach ($key in $visualEffectsKeys) {
+    if (!(Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
+}
+
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name VisualFXSetting -Value 2 -ErrorAction SilentlyContinue
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name EnableAeroPeek -Value 0 -ErrorAction SilentlyContinue
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name UseOLEDTaskbarTransparency -Value 0 -ErrorAction SilentlyContinue
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name UserPreferencesMask -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0x00,0x00,0x00)) -ErrorAction SilentlyContinue
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name MinAnimate -Value 0 -ErrorAction SilentlyContinue
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name TaskbarAnimations -Value 0 -ErrorAction SilentlyContinue
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name ListviewAlphaSelect -Value 0 -ErrorAction SilentlyContinue
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name ListviewShadow -Value 0 -ErrorAction SilentlyContinue
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name IconsOnly -Value 1 -ErrorAction SilentlyContinue
+
+Write-Host " 'Adjust for Best Performance' settings applied."
+
+# --- Step 4: Disable background apps ---
+Write-Host "`nDisabling background apps..." -ForegroundColor Yellow
+$regPath2 = "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications"
+if (!(Test-Path $regPath2)) { New-Item -Path $regPath2 -Force | Out-Null }
+Set-ItemProperty -Path $regPath2 -Name "GlobalUserDisabled" -Value 1
+Write-Host "Background apps disabled."
+
+# --- Step 5: Run built-in Windows cleanup tool silently ---
+Write-Host "`nRunning Storage Sense / Disk Cleanup..." -ForegroundColor Yellow
+try {
+    Start-Process cleanmgr.exe -ArgumentList "/sagerun:1" -NoNewWindow -ErrorAction SilentlyContinue
+    Write-Host "Disk Cleanup initiated (if configured with /sageset:1)."
+} catch {
+    Write-Host "Unable to run Disk Cleanup. Configure using 'cleanmgr /sageset:1' first." -ForegroundColor DarkYellow
+}
+
+# --- Step 6: Optimize drives (defrag for HDD / trim for SSD) ---
+Write-Host "`nOptimizing drives..." -ForegroundColor Yellow
+
+Get-Volume |
+    Where-Object { $_.DriveType -eq 'Fixed' -and $_.DriveLetter } |
+    ForEach-Object {
+        Write-Host "Optimizing drive $($_.DriveLetter)..."
+        try {
+            Optimize-Volume -DriveLetter $_.DriveLetter -Verbose -ErrorAction Stop
+        } catch {
+            Write-Host " Could not optimize drive $($_.DriveLetter): $($_.Exception.Message)" -ForegroundColor DarkYellow
+        }
+    }
+
+Write-Host "Drives optimized."
+
+# --- Step 7: Clear Windows update cache (safe cleanup) ---
+Write-Host "`nClearing Windows Update cache..." -ForegroundColor Yellow
+try {
+    net stop wuauserv | Out-Null
+    Remove-Item "C:\Windows\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction SilentlyContinue
+    net start wuauserv | Out-Null
+    Write-Host "Windows Update cache cleared."
+} catch {
+    Write-Host "Could not clear update cache (requires admin)." -ForegroundColor DarkYellow
+}
+
+# --- Step 8: Flush DNS cache ---
+Write-Host "`nFlushing DNS cache..." -ForegroundColor Yellow
+try {
+    ipconfig /flushdns | Out-Null
+    Write-Host "DNS cache flushed."
+} catch {
+    Write-Host "Unable to flush DNS cache." -ForegroundColor DarkYellow
+}
+
+# --- Step 9: Memory optimization (optional) ---
+Write-Host "`nClearing standby memory (RAM)..." -ForegroundColor Yellow
+$emptyStandbyTool = "EmptyStandbyList.exe"
+if (Test-Path $emptyStandbyTool) {
+    Start-Process -FilePath "cmd.exe" -ArgumentList "/c $emptyStandbyTool workingsets" -ErrorAction SilentlyContinue
+    Write-Host "Memory optimized."
+} else {
+    Write-Host "Skipped — EmptyStandbyList.exe not found (optional tool)." -ForegroundColor DarkYellow
+}
+
+# --- Step 10: Completion message ---
+Write-Host "`nAll optimizations completed successfully!" -ForegroundColor Green
+Write-Host "Please restart your computer for all changes to take full effect."</pre>
+      <div class="buttons">
+        <button class="copy-btn" onclick="copyScript('script1')">📋 Copy</button>
+        <button class="download-btn" onclick="downloadScript('script1','Win11_Optimizer.ps1')">⬇️ Download</button>
+      </div>
+    </details>
+
+    <details>
+      <summary>Clear DNS, Temp, and Cache</summary>
+      <pre class="language-powershell" id="script2">ipconfig /flushdns
+Remove-Item "$env:TEMP\*" -Recurse -Force
+Clear-RecycleBin -Force</pre>
+      <div class="buttons">
+        <button class="copy-btn" onclick="copyScript('script2')">📋 Copy</button>
+        <button class="download-btn" onclick="downloadScript('script2','ClearDNS_Temp.ps1')">⬇️ Download</button>
+      </div>
+    </details>
+
+    <details>
+      <summary>Restart Network Adapters</summary>
+      <pre class="language-powershell" id="script3">
+Get-NetAdapter | Where-Object {$_.Status -eq 'Up'} | Disable-NetAdapter -Confirm:$false
+Start-Sleep -Seconds 5
+Get-NetAdapter | Enable-NetAdapter -Confirm:$false</pre>
+      <div class="buttons">
+        <button class="copy-btn" onclick="copyScript('script3')">📋 Copy</button>
+        <button class="download-btn" onclick="downloadScript('script3','RestartNetwork.ps1')">⬇️ Download</button>
+      </div>
+    </details>
+
+    <details>
+      <summary>Check System Health & Disk</summary>
+      <pre class="language-powershell" id="script4">
+sfc /scannow
+DISM /Online /Cleanup-Image /RestoreHealth
+chkdsk C: /scan</pre>
+      <div class="buttons">
+        <button class="copy-btn" onclick="copyScript('script4')">📋 Copy</button>
+        <button class="download-btn" onclick="downloadScript('script4','SystemHealth.ps1')">⬇️ Download</button>
+      </div>
+    </details>
+
+    <details>
+      <summary>Enable High Performance Power Plan</summary>
+      <pre class="language-powershell" id="script5">
+powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61
+powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61</pre>
+      <div class="buttons">
+        <button class="copy-btn" onclick="copyScript('script5')">📋 Copy</button>
+        <button class="download-btn" onclick="downloadScript('script5','HighPerformance.ps1')">⬇️ Download</button>
+      </div>
+    </details>
+
+    <div class="footer">
+      <div>Click the arrow to expand, copy, or download any script.</div>
+      <div class="author">Created by Ahsan Naseer Khan - ahsmkhan<br>ITS Support Associate II - GSD1 (Team Carm Cyril)</div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/prism-powershell.min.js"></script>
+
+  <script>
+    function toggleDarkMode() { document.body.classList.toggle('dark'); }
+
+    function copyScript(id){
+      const code = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(code).then(()=>alert('✅ Script copied!'));
+    }
+
+    function downloadScript(id, filename){
+      const code = document.getElementById(id).innerText;
+      const blob = new Blob([code], {type: 'text/plain'});
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+  </script>
+</body>
+</html>
