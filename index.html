@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Windows Optimization Powerhell Scripts</title>
+  <title>Windows Optimization Scripts</title>
 
   <!-- Prism.js CSS for syntax highlighting -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
@@ -167,6 +167,7 @@
     <details>
       <summary>Windows 11 Performance Optimizer</summary>
       <pre class="language-powershell" id="script1">Write-Host "Starting Windows 11 performance optimization..." -ForegroundColor Cyan
+<!-- --- .......................................Work Space ...................................................................... -->
 
 # --- Step 1: Clean temporary and cache files ---
 Write-Host "`nCleaning temporary files..." -ForegroundColor Yellow
@@ -295,6 +296,8 @@ Write-Host "Please restart your computer for all changes to take full effect."</
       </div>
     </details>
 
+<!-- --- .......................................Work Space ...................................................................... -->
+
     <details>
       <summary>Clear DNS, Temp, and Cache</summary>
       <pre class="language-powershell" id="script2">ipconfig /flushdns
@@ -305,6 +308,8 @@ Clear-RecycleBin -Force</pre>
         <button class="download-btn" onclick="downloadScript('script2','ClearDNS_Temp.ps1')">⬇️ Download</button>
       </div>
     </details>
+
+<!-- --- .......................................Work Space ...................................................................... -->
 
     <details>
       <summary>Restart Network Adapters</summary>
@@ -317,6 +322,7 @@ Get-NetAdapter | Enable-NetAdapter -Confirm:$false</pre>
         <button class="download-btn" onclick="downloadScript('script3','RestartNetwork.ps1')">⬇️ Download</button>
       </div>
     </details>
+<!-- --- .......................................Work Space ...................................................................... -->
 
     <details>
       <summary>Check System Health & Disk</summary>
@@ -329,6 +335,7 @@ chkdsk C: /scan</pre>
         <button class="download-btn" onclick="downloadScript('script4','SystemHealth.ps1')">⬇️ Download</button>
       </div>
     </details>
+<!-- --- .......................................Work Space ...................................................................... -->
 
     <details>
       <summary>Enable High Performance Power Plan</summary>
@@ -340,7 +347,37 @@ powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61</pre>
         <button class="download-btn" onclick="downloadScript('script5','HighPerformance.ps1')">⬇️ Download</button>
       </div>
     </details>
+<!-- --- .......................................Work Space ...................................................................... -->
+<details>
+      <summary>MAC Optimizations </summary>
+      <pre class="language-powershell" id="script2">echo "<0001f9f0> Cleaning up temporary files..."
+sudo rm -rf /private/var/tmp/* 2>/dev/null
+sudo rm -rf /private/tmp/* 2>/dev/null
 
+echo "Rebuilding Spotlight index (optional, may take time)..."
+sudo mdutil -E / 2>/dev/null
+
+echo "Clearing DNS cache..."
+sudo dscacheutil -flushcache
+sudo killall -HUP mDNSResponder 2>/dev/null || true
+
+echo "Checking system resource usage..."
+echo ""
+echo "CPU usage (top 10 processes):"
+ps -A -o %cpu,comm | sort -nr | head -n 10
+
+echo ""
+echo "Memory pressure and swap usage:"
+vm_stat | egrep 'free|active|inactive|speculative|swap'
+
+echo ""
+echo "Optimization complete. Restart your Mac for full effect."</pre>
+      <div class="buttons">
+        <button class="copy-btn" onclick="copyScript('script2')">📋 Copy</button>
+        <button class="download-btn" onclick="downloadScript('script2','ClearDNS_Temp.ps1')">⬇️ Download</button>
+      </div>
+    </details>
+<!-- --- .......................................Work Space ...................................................................... -->
     <div class="footer">
       <div>Click the arrow to expand, copy, or download any script.</div>
       <div class="author">Created by Ahsan Naseer Khan - ahsmkhan<br>ITS Support Associate II - GSD1 (Team Carm Cyril)</div>
@@ -357,7 +394,6 @@ powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61</pre>
       const code = document.getElementById(id).innerText;
       navigator.clipboard.writeText(code).then(()=>alert('✅ Script copied!'));
     }
-
     function downloadScript(id, filename){
       const code = document.getElementById(id).innerText;
       const blob = new Blob([code], {type: 'text/plain'});
@@ -370,4 +406,3 @@ powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61</pre>
   </script>
 </body>
 </html>
-
