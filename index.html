@@ -360,36 +360,7 @@ Clear-RecycleBin -Force</pre>
     </details>
 
 <!-- --- .......................................Work Space ...................................................................... -->
-<details>
-      <summary> XYZ  </summary>
-      <pre class="language-powershell" id="script2">echo "<0001f9f0> Cleaning up temporary files..."
-sudo rm -rf /private/var/tmp/* 2>/dev/null
-sudo rm -rf /private/tmp/* 2>/dev/null
 
-echo "Rebuilding Spotlight index (optional, may take time)..."
-sudo mdutil -E / 2>/dev/null
-
-echo "Clearing DNS cache..."
-sudo dscacheutil -flushcache
-sudo killall -HUP mDNSResponder 2>/dev/null || true
-
-echo "Checking system resource usage..."
-echo ""
-echo "CPU usage (top 10 processes):"
-ps -A -o %cpu,comm | sort -nr | head -n 10
-
-echo ""
-echo "Memory pressure and swap usage:"
-vm_stat | egrep 'free|active|inactive|speculative|swap'
-
-echo ""
-echo "Optimization complete. Restart your Mac for full effect."</pre>
-      <div class="buttons">
-        <button class="copy-btn" onclick="copyScript('script2')">📋 Copy</button>
-        <button class="download-btn" onclick="downloadScript('script2','ClearDNS_Temp.ps1')">⬇️ Download</button>
-      </div>
-    </details>
-<!-- --- .......................................Work Space ...................................................................... -->
     <div class="footer">
       <div>Click the arrow to expand, copy, or download any script.</div>
       <div class="author">Created by Ahsan Naseer Khan - ahsmkhan<br>ITS Support Associate II - GSD1 (Team Carm Cyril)</div>
@@ -419,4 +390,5 @@ echo "Optimization complete. Restart your Mac for full effect."</pre>
   </script>
 </body>
 </html>
+
 
