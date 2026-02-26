@@ -360,6 +360,18 @@ Clear-RecycleBin -Force</pre>
     </details>
 
 <!-- --- .......................................Work Space ...................................................................... -->
+            <details>
+      <summary>xyz troubleshooting </summary>
+      <pre class="language-powershell" id="script2">ipconfig /flushdns
+Remove-Item "$env:TEMP\*" -Recurse -Force
+Clear-RecycleBin -Force</pre>
+      <div class="buttons">
+        <button class="copy-btn" onclick="copyScript('script2')">📋 Copy</button>
+        <button class="download-btn" onclick="downloadScript('script2','ClearDNS_Temp.ps1')">⬇️ Download</button>
+      </div>
+    </details>
+
+<!-- --- .......................................Work Space ...................................................................... -->
 
     <div class="footer">
       <div>Click the arrow to expand, copy, or download any script.</div>
@@ -390,5 +402,6 @@ Clear-RecycleBin -Force</pre>
   </script>
 </body>
 </html>
+
 
 
