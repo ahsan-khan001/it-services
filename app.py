@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 from urllib.parse import urlparse
 
@@ -7,7 +8,8 @@ import requests
 from bs4 import BeautifulSoup
 from flask import Flask, render_template, request
 
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
 
 # Primary URL fallback pattern requested: /a/team/{group-name}
 TEAM_PATH_PATTERN = re.compile(r"/a/team/([A-Za-z0-9._-]+)")
@@ -76,6 +78,11 @@ def index():
         error=error,
         submitted_url=submitted_url,
     )
+
+
+@app.route("/health", methods=["GET"])
+def health():
+    return {"status": "ok"}, 200
 
 
 if __name__ == "__main__":
