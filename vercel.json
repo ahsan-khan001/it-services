@@ -6,8 +6,7 @@
       "use": "@vercel/python",
       "config": {
         "includeFiles": [
-          "templates/**",
-          "index.html"
+          "templates/**"
         ]
       }
     }
