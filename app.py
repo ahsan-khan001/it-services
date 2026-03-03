@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import re
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -13,7 +13,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
 
 # Primary URL fallback pattern requested: /a/team/{group-name}
-TEAM_PATH_PATTERN = re.compile(r"/a/team/([A-Za-z0-9._-]+)")
+TEAM_PATH_PATTERN = re.compile(r"/a/team/([^/?#]+)")
 
 FALLBACK_TEMPLATE = """
 <!DOCTYPE html>
@@ -94,9 +94,19 @@ def extract_group_from_text(html: str) -> str | None:
 
 
 def extract_group_from_url(raw_url: str) -> str | None:
-    match = TEAM_PATH_PATTERN.search(raw_url)
+    parsed = urlparse(raw_url)
+    match = TEAM_PATH_PATTERN.search(parsed.path or "")
+    if not match:
+        match = TEAM_PATH_PATTERN.search(raw_url)
     if match:
-        return match.group(1)
+        value = match.group(1)
+        # Handle encoded and double-encoded values from redirect URLs.
+        for _ in range(2):
+            decoded = unquote(value)
+            if decoded == value:
+                break
+            value = decoded
+        return value.strip()
     return None
 
 
@@ -104,6 +114,7 @@ def extract_group_from_url(raw_url: str) -> str | None:
 def index():
     ant_group = None
     error = None
+    note = None
     submitted_url = ""
 
     if request.method == "POST":
@@ -117,7 +128,11 @@ def index():
                 response.raise_for_status()
                 html = response.text
             except requests.RequestException as exc:
-                error = f"Failed to fetch page: {exc}"
+                ant_group = extract_group_from_url(submitted_url)
+                if ant_group:
+                    note = "Fetched page requires authentication, so value was extracted from URL."
+                else:
+                    error = f"Failed to fetch page: {exc}"
             else:
                 ant_group = extract_group_from_text(html)
                 if not ant_group:
@@ -131,6 +146,7 @@ def index():
             "index.html",
             ant_group=ant_group,
             error=error,
+            note=note,
             submitted_url=submitted_url,
         )
     except TemplateNotFound:
@@ -138,6 +154,7 @@ def index():
         return app.jinja_env.from_string(FALLBACK_TEMPLATE).render(
             ant_group=ant_group,
             error=error,
+            note=note,
             submitted_url=submitted_url,
         )
 
