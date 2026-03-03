@@ -85,42 +85,12 @@
     .status { min-height: 20px; margin-top: 12px; color: var(--ok); font-size: .9rem; }
     .status.error { color: var(--error); }
 
-    .extract-row {
-      display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 10px;
-      align-items: center;
-    }
-    input[type="url"] {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 9px 12px;
-      font-size: .95rem;
-      outline: none;
-    }
-    input[type="url"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(15, 98, 254, .16); }
-
-    @media (max-width: 740px) {
-      .extract-row { grid-template-columns: 1fr; }
-    }
   </style>
 </head>
 <body>
   <main class="card">
     <h1>Mailbox Template Helper</h1>
-    <p class="sub">Paste the full input template. Fields and commands are auto-generated with copy buttons.</p>
-
-    <h2 class="section-title">Extract ANT Group From URL</h2>
-    <div class="row">
-      <div class="extract-row">
-        <input id="antUrlInput" type="url" placeholder="https://permissions.amazon.com/a/team/ivpn-remote-imaging-temporary-access">
-        <button class="action" id="extractAntBtn" type="button">Extract</button>
-        <button class="copy" id="copyExtractedBtn" type="button">Copy</button>
-      </div>
-      <p class="val" id="antUrlVal">-</p>
-      <p class="note" id="antUrlNote"></p>
-    </div>
+    <p class="sub">Paste the full input template. ANT Permissions Group will auto-extract from URL when present.</p>
 
     <label for="templateInput">Input Template</label>
     <textarea id="templateInput">Email Address: pvtechevents@amazon.com
@@ -208,19 +178,15 @@ ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?
     const cmd2El = document.getElementById("cmd2");
     const cmd3El = document.getElementById("cmd3");
 
-    const antUrlInput = document.getElementById("antUrlInput");
-    const extractAntBtn = document.getElementById("extractAntBtn");
-    const copyExtractedBtn = document.getElementById("copyExtractedBtn");
-    const antUrlVal = document.getElementById("antUrlVal");
-    const antUrlNote = document.getElementById("antUrlNote");
-
     let data = {
       email: "",
       display: "",
       external: "",
       ant: "",
+      antUrl: "",
       fullAlias: ""
     };
+    let antRequestId = 0;
 
     function pick(text, re) {
       const m = text.match(re);
@@ -231,10 +197,39 @@ ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?
       const email = pick(text, /^Email Address:\s*(.+)$/im);
       const display = pick(text, /^Display Name:\s*(.+)$/im);
       const external = pick(text, /^External Facing\s*\(Y\/N\):\s*([YN])$/im);
-      const ant = pick(text, /^ANT Permissions Group:\s*(.+)$/im);
+      const antLine = pick(text, /^ANT Permissions Group:\s*(.+)$/im);
+      const antUrlMatch = antLine.match(/https?:\/\/\S+/i);
+      const antUrl = antUrlMatch ? antUrlMatch[0] : "";
+      const ant = antLine;
       const fullAlias = email.includes("@") ? email.split("@")[0] : "";
 
-      return { email, display, external, ant, fullAlias };
+      return { email, display, external, ant, antUrl, fullAlias };
+    }
+
+    async function resolveAntFromTemplateUrl(url) {
+      const currentId = ++antRequestId;
+      if (!url) return;
+
+      antEl.textContent = "Extracting...";
+      try {
+        const response = await fetch("/api/extract-ant", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url })
+        });
+        const payload = await response.json();
+        if (currentId !== antRequestId) return;
+        if (!response.ok || !payload.ok) return;
+        data.ant = payload.ant_group || data.ant;
+        antEl.textContent = data.ant || "-";
+        statusEl.textContent = payload.note || "ANT group extracted successfully.";
+        statusEl.classList.remove("error");
+      } catch {
+        if (currentId !== antRequestId) return;
+        antEl.textContent = data.ant || "-";
+        statusEl.textContent = "ANT group URL extraction failed. Showing original ANT field value.";
+        statusEl.classList.add("error");
+      }
     }
 
     function render() {
@@ -244,6 +239,9 @@ ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?
       displayEl.textContent = data.display || "-";
       externalEl.textContent = data.external || "-";
       antEl.textContent = data.ant || "-";
+      if (data.antUrl) {
+        resolveAntFromTemplateUrl(data.antUrl);
+      }
 
       cmd1El.textContent = `Get-MailboxInfo -Identity ${data.email || "<email address>"}`;
       cmd2El.textContent = `mda -e --internal-only ${data.fullAlias || "<FullAlias>"}`;
@@ -279,57 +277,9 @@ ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?
       }
     }
 
-    async function extractAntFromUrl() {
-      const url = antUrlInput.value.trim();
-      antUrlNote.textContent = "";
-
-      if (!url) {
-        antUrlVal.textContent = "-";
-        statusEl.textContent = "Enter a URL first.";
-        statusEl.classList.add("error");
-        return;
-      }
-
-      extractAntBtn.disabled = true;
-      extractAntBtn.textContent = "Extracting...";
-      statusEl.textContent = "";
-
-      try {
-        const response = await fetch("/api/extract-ant", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url })
-        });
-
-        const payload = await response.json();
-        if (!response.ok || !payload.ok) {
-          throw new Error(payload.error || "Failed to extract ANT group.");
-        }
-
-        antUrlVal.textContent = payload.ant_group || "-";
-        antUrlNote.textContent = payload.note || "";
-        antEl.textContent = payload.ant_group || "-";
-        data.ant = payload.ant_group || "";
-
-        statusEl.textContent = "ANT group extracted successfully.";
-        statusEl.classList.remove("error");
-      } catch (err) {
-        antUrlVal.textContent = "-";
-        antUrlNote.textContent = "";
-        statusEl.textContent = err.message || "Failed to extract ANT group.";
-        statusEl.classList.add("error");
-      } finally {
-        extractAntBtn.disabled = false;
-        extractAntBtn.textContent = "Extract";
-      }
-    }
-
     document.querySelectorAll("button.copy[data-copy]").forEach((btn) => {
       btn.addEventListener("click", () => copyText(valueByKey(btn.dataset.copy)));
     });
-
-    copyExtractedBtn.addEventListener("click", () => copyText(antUrlVal.textContent));
-    extractAntBtn.addEventListener("click", extractAntFromUrl);
 
     inputEl.addEventListener("input", render);
     render();
