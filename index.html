@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Windows Optimization Scripts</title>
 
-  <!-- Prism.js CSS for syntax highlighting -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
 
   <style>
@@ -18,6 +17,7 @@
       --hover-accent: #1d4ed8;
       --box-bg: #f3f4f6;
       --shadow: rgba(0,0,0,0.1);
+      --ok: #047857;
     }
 
     body.dark {
@@ -29,6 +29,7 @@
       --hover-accent: #3b82f6;
       --box-bg: #1a2a45;
       --shadow: rgba(0,0,0,0.6);
+      --ok: #34d399;
     }
 
     body {
@@ -104,17 +105,16 @@
       overflow-x: auto;
       padding: 10px;
       font-size: 14px;
-      font-weight: 500; /* Slightly bolder for crispness */
-      color: #111827; /* Dark text for light mode */
-      text-shadow: 0 0 1px rgba(0,0,0,0.2); /* Subtle shadow for clarity */
+      font-weight: 500;
+      color: #111827;
+      text-shadow: 0 0 1px rgba(0,0,0,0.2);
     }
 
     body.dark pre {
       color: #e2e8f0;
-      text-shadow: none; /* No shadow needed in dark mode */
+      text-shadow: none;
     }
 
-    /* Fix Prism.js faded text in light mode */
     body:not(.dark) pre[class*="language-"] {
       color: #111827 !important;
     }
@@ -152,6 +152,90 @@
     .footer { text-align: center; margin-top: 30px; color: var(--text-color); font-size: 13px; opacity: 0.8; }
     .author { font-weight: 500; color: var(--accent); }
 
+    .mailbox-module {
+      margin-top: 12px;
+    }
+
+    .mailbox-module label {
+      font-weight: 600;
+      display: block;
+      margin: 8px 0;
+    }
+
+    .mailbox-input {
+      width: 100%;
+      min-height: 140px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      resize: vertical;
+      background: var(--container-bg);
+      color: var(--text-color);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+    }
+
+    .mailbox-grid {
+      margin-top: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .mailbox-card {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      background: var(--container-bg);
+    }
+
+    .mailbox-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .mailbox-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .mailbox-value {
+      margin: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .mailbox-note {
+      margin: 6px 0 0;
+      opacity: 0.8;
+      font-size: 12px;
+    }
+
+    .mailbox-status {
+      margin-top: 8px;
+      min-height: 16px;
+      color: var(--ok);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .small-copy {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      color: white;
+      background: var(--accent);
+    }
+
+    .small-copy:hover { background: var(--hover-accent); }
+
     @media (max-width: 600px) {
       body { padding: 20px; }
       .container { padding: 20px; }
@@ -163,6 +247,79 @@
 
   <div class="container">
     <h1>Team Carm Cyril - Powershell Toolkit</h1>
+
+    <details>
+      <summary>Mailbox Input Template Parser</summary>
+      <div class="mailbox-module">
+        <label for="mailboxTemplateInput">Paste Input Template</label>
+        <textarea id="mailboxTemplateInput" class="mailbox-input">Email Address: pvtechevents@amazon.com
+Display Name: pvtechevents
+External Facing (Y/N): N
+ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?target=64746294)</textarea>
+
+        <div class="mailbox-grid">
+          <div class="mailbox-card">
+            <div class="mailbox-card-top">
+              <span class="mailbox-title">Email Address</span>
+              <button class="small-copy" type="button" onclick="copyMailboxValue('email')">Copy</button>
+            </div>
+            <p id="mailboxEmail" class="mailbox-value"></p>
+          </div>
+
+          <div class="mailbox-card">
+            <div class="mailbox-card-top">
+              <span class="mailbox-title">Display Name</span>
+              <button class="small-copy" type="button" onclick="copyMailboxValue('display')">Copy</button>
+            </div>
+            <p id="mailboxDisplay" class="mailbox-value"></p>
+          </div>
+
+          <div class="mailbox-card">
+            <div class="mailbox-card-top">
+              <span class="mailbox-title">External Facing (Y/N)</span>
+              <button class="small-copy" type="button" onclick="copyMailboxValue('external')">Copy</button>
+            </div>
+            <p id="mailboxExternal" class="mailbox-value"></p>
+          </div>
+
+          <div class="mailbox-card">
+            <div class="mailbox-card-top">
+              <span class="mailbox-title">ANT Permissions Group</span>
+              <button class="small-copy" type="button" onclick="copyMailboxValue('ant')">Copy</button>
+            </div>
+            <p id="mailboxAnt" class="mailbox-value"></p>
+          </div>
+
+          <div class="mailbox-card">
+            <div class="mailbox-card-top">
+              <span class="mailbox-title">command to baseline the mailbox and confirm it was created successfully</span>
+              <button class="small-copy" type="button" onclick="copyMailboxValue('cmd1')">Copy</button>
+            </div>
+            <p id="mailboxCmd1" class="mailbox-value"></p>
+          </div>
+
+          <div class="mailbox-card">
+            <div class="mailbox-card-top">
+              <span class="mailbox-title">For an internal only (not externally facing)</span>
+              <button class="small-copy" type="button" onclick="copyMailboxValue('cmd2')">Copy</button>
+            </div>
+            <p id="mailboxCmd2" class="mailbox-value"></p>
+            <p class="mailbox-note">Replace full alias. Full alias = text before @amazon.com</p>
+          </div>
+
+          <div class="mailbox-card">
+            <div class="mailbox-card-top">
+              <span class="mailbox-title">For an externally facing alias run</span>
+              <button class="small-copy" type="button" onclick="copyMailboxValue('cmd3')">Copy</button>
+            </div>
+            <p id="mailboxCmd3" class="mailbox-value"></p>
+            <p class="mailbox-note">Replace full alias. Full alias = text before @amazon.com</p>
+          </div>
+        </div>
+
+        <div id="mailboxStatus" class="mailbox-status"></div>
+      </div>
+    </details>
 
     <details>
       <summary>Windows 11 Performance Optimizer</summary>
@@ -296,8 +453,6 @@ Write-Host "Please restart your computer for all changes to take full effect."</
       </div>
     </details>
 
-<!-- --- .......................................Work Space ...................................................................... -->
-
     <details>
       <summary>Clear DNS, Temp, and Cache</summary>
       <pre class="language-powershell" id="script2">ipconfig /flushdns
@@ -309,12 +464,9 @@ Clear-RecycleBin -Force</pre>
       </div>
     </details>
 
-<!-- --- .......................................Work Space ...................................................................... -->
-
     <details>
       <summary>Restart Network Adapters</summary>
-      <pre class="language-powershell" id="script3">
-Get-NetAdapter | Where-Object {$_.Status -eq 'Up'} | Disable-NetAdapter -Confirm:$false
+      <pre class="language-powershell" id="script3">Get-NetAdapter | Where-Object {$_.Status -eq 'Up'} | Disable-NetAdapter -Confirm:$false
 Start-Sleep -Seconds 5
 Get-NetAdapter | Enable-NetAdapter -Confirm:$false</pre>
       <div class="buttons">
@@ -322,12 +474,10 @@ Get-NetAdapter | Enable-NetAdapter -Confirm:$false</pre>
         <button class="download-btn" onclick="downloadScript('script3','RestartNetwork.ps1')">⬇️ Download</button>
       </div>
     </details>
-<!-- --- .......................................Work Space ...................................................................... -->
 
     <details>
       <summary>Check System Health & Disk</summary>
-      <pre class="language-powershell" id="script4">
-sfc /scannow
+      <pre class="language-powershell" id="script4">sfc /scannow
 DISM /Online /Cleanup-Image /RestoreHealth
 chkdsk C: /scan</pre>
       <div class="buttons">
@@ -335,43 +485,38 @@ chkdsk C: /scan</pre>
         <button class="download-btn" onclick="downloadScript('script4','SystemHealth.ps1')">⬇️ Download</button>
       </div>
     </details>
-<!-- --- .......................................Work Space ...................................................................... -->
 
     <details>
       <summary>Enable High Performance Power Plan</summary>
-      <pre class="language-powershell" id="script5">
-powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61
+      <pre class="language-powershell" id="script5">powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61
 powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61</pre>
       <div class="buttons">
         <button class="copy-btn" onclick="copyScript('script5')">📋 Copy</button>
         <button class="download-btn" onclick="downloadScript('script5','HighPerformance.ps1')">⬇️ Download</button>
       </div>
     </details>
-<!-- --- .......................................Work Space ...................................................................... -->
-        <details>
-      <summary>Clear DNS, Temp, and Cache</summary>
-      <pre class="language-powershell" id="script2">ipconfig /flushdns
+
+    <details>
+      <summary>Clear DNS, Temp, and Cache (Alternative)</summary>
+      <pre class="language-powershell" id="script6">ipconfig /flushdns
 Remove-Item "$env:TEMP\*" -Recurse -Force
 Clear-RecycleBin -Force</pre>
       <div class="buttons">
-        <button class="copy-btn" onclick="copyScript('script2')">📋 Copy</button>
-        <button class="download-btn" onclick="downloadScript('script2','ClearDNS_Temp.ps1')">⬇️ Download</button>
+        <button class="copy-btn" onclick="copyScript('script6')">📋 Copy</button>
+        <button class="download-btn" onclick="downloadScript('script6','ClearDNS_Temp_Alt.ps1')">⬇️ Download</button>
       </div>
     </details>
 
-<!-- --- .......................................Work Space ...................................................................... -->
-            <details>
-      <summary>xyz troubleshooting </summary>
-      <pre class="language-powershell" id="script2">ipconfig /flushdns
+    <details>
+      <summary>xyz troubleshooting</summary>
+      <pre class="language-powershell" id="script7">ipconfig /flushdns
 Remove-Item "$env:TEMP\*" -Recurse -Force
 Clear-RecycleBin -Force</pre>
       <div class="buttons">
-        <button class="copy-btn" onclick="copyScript('script2')">📋 Copy</button>
-        <button class="download-btn" onclick="downloadScript('script2','ClearDNS_Temp.ps1')">⬇️ Download</button>
+        <button class="copy-btn" onclick="copyScript('script7')">📋 Copy</button>
+        <button class="download-btn" onclick="downloadScript('script7','xyz_troubleshooting.ps1')">⬇️ Download</button>
       </div>
     </details>
-
-<!-- --- .......................................Work Space ...................................................................... -->
 
     <div class="footer">
       <div>Click the arrow to expand, copy, or download any script.</div>
@@ -383,25 +528,101 @@ Clear-RecycleBin -Force</pre>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/prism-powershell.min.js"></script>
 
   <script>
-    function toggleDarkMode() { document.body.classList.toggle('dark'); }
-
-    function copyScript(id){
-      const code = document.getElementById(id).innerText;
-      navigator.clipboard.writeText(code).then(()=>alert('✅ Script copied!'));
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
     }
 
-    function downloadScript(id, filename){
+    function copyScript(id) {
       const code = document.getElementById(id).innerText;
-      const blob = new Blob([code], {type: 'text/plain'});
+      navigator.clipboard.writeText(code).then(() => alert('✅ Script copied!'));
+    }
+
+    function downloadScript(id, filename) {
+      const code = document.getElementById(id).innerText;
+      const blob = new Blob([code], { type: 'text/plain' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = filename;
       link.click();
       URL.revokeObjectURL(link.href);
     }
+
+    const mailboxState = {
+      email: '',
+      display: '',
+      external: '',
+      ant: '',
+      fullAlias: ''
+    };
+
+    function pickField(text, regex) {
+      const match = text.match(regex);
+      return match ? match[1].trim() : '';
+    }
+
+    function parseMailboxTemplate(text) {
+      const email = pickField(text, /^Email Address:\s*(.+)$/im);
+      const display = pickField(text, /^Display Name:\s*(.+)$/im);
+      const external = pickField(text, /^External Facing\s*\(Y\/N\):\s*([YN])$/im);
+      const ant = pickField(text, /^ANT Permissions Group:\s*(.+)$/im);
+      const fullAlias = email.includes('@') ? email.split('@')[0] : '';
+
+      mailboxState.email = email;
+      mailboxState.display = display;
+      mailboxState.external = external;
+      mailboxState.ant = ant;
+      mailboxState.fullAlias = fullAlias;
+    }
+
+    function updateMailboxModule() {
+      const input = document.getElementById('mailboxTemplateInput');
+      if (!input) return;
+
+      parseMailboxTemplate(input.value);
+
+      document.getElementById('mailboxEmail').innerText = mailboxState.email || '-';
+      document.getElementById('mailboxDisplay').innerText = mailboxState.display || '-';
+      document.getElementById('mailboxExternal').innerText = mailboxState.external || '-';
+      document.getElementById('mailboxAnt').innerText = mailboxState.ant || '-';
+
+      document.getElementById('mailboxCmd1').innerText = `Get-MailboxInfo -Identity ${mailboxState.email || '<email address>'}`;
+      document.getElementById('mailboxCmd2').innerText = `mda -e --internal-only ${mailboxState.fullAlias || '<FullAlias>'}`;
+      document.getElementById('mailboxCmd3').innerText = `mda -e ${mailboxState.fullAlias || '<FullAlias>'}`;
+
+      document.getElementById('mailboxStatus').innerText = '';
+    }
+
+    function mailboxValueByType(type) {
+      if (type === 'email') return mailboxState.email;
+      if (type === 'display') return mailboxState.display;
+      if (type === 'external') return mailboxState.external;
+      if (type === 'ant') return mailboxState.ant;
+      if (type === 'cmd1') return document.getElementById('mailboxCmd1').innerText;
+      if (type === 'cmd2') return document.getElementById('mailboxCmd2').innerText;
+      if (type === 'cmd3') return document.getElementById('mailboxCmd3').innerText;
+      return '';
+    }
+
+    function copyMailboxValue(type) {
+      const text = mailboxValueByType(type);
+      const status = document.getElementById('mailboxStatus');
+
+      if (!text || text === '-') {
+        status.innerText = 'Nothing to copy.';
+        return;
+      }
+
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          status.innerText = 'Copied to clipboard.';
+        })
+        .catch(() => {
+          status.innerText = 'Copy failed. Please copy manually.';
+        });
+    }
+
+    document.getElementById('mailboxTemplateInput').addEventListener('input', updateMailboxModule);
+    updateMailboxModule();
   </script>
 </body>
 </html>
-
-
-
