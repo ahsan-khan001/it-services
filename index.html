@@ -47,6 +47,15 @@
       outline: none;
       resize: vertical;
     }
+    input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: .9rem;
+      outline: none;
+    }
+    input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(15, 98, 254, .16); }
     textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(15, 98, 254, .16); }
 
     .section-title { margin: 18px 0 8px; font-size: 1rem; }
@@ -97,6 +106,8 @@
 Display Name: pvtechevents
 External Facing (Y/N): N
 ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?target=64746294)</textarea>
+    <p class="note">Optional auth cookie (for protected internal pages): paste full <code>Cookie</code> header value.</p>
+    <input id="authCookieInput" type="text" placeholder="cookie1=value1; cookie2=value2; ...">
     <p style="margin:10px 0 0;">
       <button class="action" id="extractFromTemplateBtn" type="button">Extract ANT From Template</button>
     </p>
@@ -181,6 +192,7 @@ ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?
     const cmd2El = document.getElementById("cmd2");
     const cmd3El = document.getElementById("cmd3");
     const extractFromTemplateBtn = document.getElementById("extractFromTemplateBtn");
+    const authCookieInput = document.getElementById("authCookieInput");
 
     let data = {
       email: "",
@@ -222,7 +234,7 @@ ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?
         const response = await fetch("/api/extract-ant", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url })
+          body: JSON.stringify({ url, auth_cookie: authCookieInput.value.trim() })
         });
         const payload = await response.json();
         if (currentId !== antRequestId) return;

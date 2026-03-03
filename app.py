@@ -67,15 +67,30 @@ def extract_group_from_url(raw_url: str) -> str | None:
     return None
 
 
-def extract_ant_group(raw_url: str) -> tuple[str | None, str | None, str | None]:
+def extract_ant_group(
+    raw_url: str, auth_cookie: str = ""
+) -> tuple[str | None, str | None, str | None]:
     """
     Returns: (ant_group, note, error)
     """
     if not raw_url or not is_valid_url(raw_url):
         return None, None, "Please enter a valid URL (including http:// or https://)."
 
+    if not auth_cookie:
+        auth_cookie = os.getenv("ANT_AUTH_COOKIE", "").strip()
+
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/124.0.0.0 Safari/537.36"
+        )
+    }
+    if auth_cookie:
+        headers["Cookie"] = auth_cookie
+
     try:
-        response = requests.get(raw_url, timeout=15)
+        response = requests.get(raw_url, timeout=15, headers=headers)
         response.raise_for_status()
         html = response.text
     except requests.RequestException as exc:
@@ -113,8 +128,9 @@ def index():
 def api_extract_ant():
     payload = request.get_json(silent=True) or {}
     raw_url = str(payload.get("url", "")).strip()
+    auth_cookie = str(payload.get("auth_cookie", "")).strip()
 
-    ant_group, note, error = extract_ant_group(raw_url)
+    ant_group, note, error = extract_ant_group(raw_url, auth_cookie=auth_cookie)
     if error:
         return jsonify({"ok": False, "error": error}), 400
 
