@@ -1,628 +1,338 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Windows Optimization Scripts</title>
-
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-
+  <title>Mailbox Template Helper</title>
   <style>
     :root {
-      --bg-color: #f9fafb;
-      --container-bg: #ffffff;
-      --text-color: #111827;
-      --border-color: #d1d5db;
-      --accent: #2563eb;
-      --hover-accent: #1d4ed8;
-      --box-bg: #f3f4f6;
-      --shadow: rgba(0,0,0,0.1);
-      --ok: #047857;
+      --bg: #f4f7fb;
+      --card: #fff;
+      --text: #0f172a;
+      --muted: #475569;
+      --line: #d6deea;
+      --accent: #0f62fe;
+      --ok: #0a7a3c;
+      --error: #b91c1c;
     }
-
-    body.dark {
-      --bg-color: #0f172a;
-      --container-bg: #1e293b;
-      --text-color: #e2e8f0;
-      --border-color: #334155;
-      --accent: #60a5fa;
-      --hover-accent: #3b82f6;
-      --box-bg: #1a2a45;
-      --shadow: rgba(0,0,0,0.6);
-      --ok: #34d399;
-    }
-
+    * { box-sizing: border-box; }
     body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      padding: 40px;
-      transition: background-color 0.3s, color 0.3s;
-    }
-
-    .toggle-btn {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 8px 15px;
-      border: none;
-      border-radius: 8px;
-      background-color: var(--accent);
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      z-index: 1000;
-    }
-
-    .toggle-btn:hover { background-color: var(--hover-accent); }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: var(--container-bg);
-      border-radius: 12px;
-      padding: 25px 35px;
-      box-shadow: 0 4px 20px var(--shadow);
-      transition: background-color 0.3s, color 0.3s;
-    }
-
-    h1 { text-align: center; color: var(--accent); margin-bottom: 25px; }
-
-    details {
-      margin-bottom: 20px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      background: var(--box-bg);
-      padding: 10px 15px;
-      overflow: hidden;
-      transition: all 0.3s ease-in-out;
-    }
-
-    summary {
-      font-weight: 600;
-      cursor: pointer;
-      list-style: none;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-    }
-
-    summary::before {
-      content: "▶";
-      font-size: 13px;
-      margin-right: 8px;
-      color: var(--accent);
-      transition: transform 0.3s;
-    }
-
-    details[open] summary::before { content: "▼"; }
-
-    pre {
-      background: none !important;
-      border: none !important;
-      overflow-x: auto;
-      padding: 10px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #111827;
-      text-shadow: 0 0 1px rgba(0,0,0,0.2);
-    }
-
-    body.dark pre {
-      color: #e2e8f0;
-      text-shadow: none;
-    }
-
-    body:not(.dark) pre[class*="language-"] {
-      color: #111827 !important;
-    }
-    body:not(.dark) .token.comment,
-    body:not(.dark) .token.punctuation,
-    body:not(.dark) .token.operator,
-    body:not(.dark) .token.keyword,
-    body:not(.dark) .token.function,
-    body:not(.dark) .token.string {
-      opacity: 1 !important;
-    }
-
-    .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 10px;
-      flex-wrap: wrap;
-    }
-
-    .copy-btn, .download-btn {
-      padding: 8px 18px;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      cursor: pointer;
-      font-weight: bold;
-      color: white;
-      background-color: var(--accent);
-      transition: background-color 0.3s;
-    }
-
-    .copy-btn:hover, .download-btn:hover { background-color: var(--hover-accent); }
-
-    .footer { text-align: center; margin-top: 30px; color: var(--text-color); font-size: 13px; opacity: 0.8; }
-    .author { font-weight: 500; color: var(--accent); }
-
-    .mailbox-module {
-      margin-top: 12px;
-    }
-
-    .mailbox-module label {
-      font-weight: 600;
-      display: block;
-      margin: 8px 0;
-    }
-
-    .mailbox-input {
-      width: 100%;
-      min-height: 140px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 10px;
-      resize: vertical;
-      background: var(--container-bg);
-      color: var(--text-color);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 13px;
-    }
-
-    .mailbox-grid {
-      margin-top: 12px;
+      min-height: 100vh;
+      padding: 20px;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #eef4ff 0%, #f8fbff 100%);
       display: grid;
-      gap: 10px;
+      place-items: center;
     }
+    .card {
+      width: min(960px, 100%);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    h1 { margin: 0 0 8px; font-size: 1.35rem; }
+    .sub { margin: 0 0 14px; color: var(--muted); font-size: .95rem; }
+    label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: 14px/1.4 ui-monospace, Menlo, Consolas, monospace;
+      outline: none;
+      resize: vertical;
+    }
+    textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(15, 98, 254, .16); }
 
-    .mailbox-card {
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
+    .section-title { margin: 18px 0 8px; font-size: 1rem; }
+    .rows, .commands { display: grid; gap: 10px; }
+    .row, .command {
+      border: 1px solid var(--line);
+      border-radius: 10px;
       padding: 10px;
-      background: var(--container-bg);
+      background: #f8fbff;
     }
-
-    .mailbox-card-top {
+    .row-top, .command-top {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
       margin-bottom: 6px;
     }
-
-    .mailbox-title {
-      font-weight: 600;
-      font-size: 14px;
-    }
-
-    .mailbox-value {
+    .key, .cmd-title { font-weight: 600; }
+    .val, .cmd-text {
       margin: 0;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 13px;
-      overflow-x: auto;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
       white-space: nowrap;
+      overflow-x: auto;
     }
-
-    .mailbox-note {
-      margin: 6px 0 0;
-      opacity: 0.8;
-      font-size: 12px;
-    }
-
-    .mailbox-status {
-      margin-top: 8px;
-      min-height: 16px;
-      color: var(--ok);
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .small-copy {
-      padding: 6px 10px;
-      border: none;
-      border-radius: 6px;
-      font-size: 12px;
+    .note { margin: 6px 0 0; color: var(--muted); font-size: .88rem; }
+    button.copy, button.action {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      height: 34px;
+      padding: 0 10px;
       cursor: pointer;
-      font-weight: 700;
-      color: white;
-      background: var(--accent);
+      font-size: .88rem;
     }
+    button.copy:hover, button.action:hover { border-color: var(--accent); color: var(--accent); }
+    .status { min-height: 20px; margin-top: 12px; color: var(--ok); font-size: .9rem; }
+    .status.error { color: var(--error); }
 
-    .small-copy:hover { background: var(--hover-accent); }
+    .extract-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+    input[type="url"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: .95rem;
+      outline: none;
+    }
+    input[type="url"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(15, 98, 254, .16); }
 
-    @media (max-width: 600px) {
-      body { padding: 20px; }
-      .container { padding: 20px; }
+    @media (max-width: 740px) {
+      .extract-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <button class="toggle-btn" onclick="toggleDarkMode()">🌙 Toggle Dark/Light Mode</button>
+  <main class="card">
+    <h1>Mailbox Template Helper</h1>
+    <p class="sub">Paste the full input template. Fields and commands are auto-generated with copy buttons.</p>
 
-  <div class="container">
-    <h1>Team Carm Cyril - Powershell Toolkit</h1>
+    <h2 class="section-title">Extract ANT Group From URL</h2>
+    <div class="row">
+      <div class="extract-row">
+        <input id="antUrlInput" type="url" placeholder="https://permissions.amazon.com/a/team/ivpn-remote-imaging-temporary-access">
+        <button class="action" id="extractAntBtn" type="button">Extract</button>
+        <button class="copy" id="copyExtractedBtn" type="button">Copy</button>
+      </div>
+      <p class="val" id="antUrlVal">-</p>
+      <p class="note" id="antUrlNote"></p>
+    </div>
 
-    <details>
-      <summary>Mailbox Input Template Parser</summary>
-      <div class="mailbox-module">
-        <label for="mailboxTemplateInput">Paste Input Template</label>
-        <textarea id="mailboxTemplateInput" class="mailbox-input">Email Address: pvtechevents@amazon.com
+    <label for="templateInput">Input Template</label>
+    <textarea id="templateInput">Email Address: pvtechevents@amazon.com
 Display Name: pvtechevents
 External Facing (Y/N): N
 ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?target=64746294)</textarea>
 
-        <div class="mailbox-grid">
-          <div class="mailbox-card">
-            <div class="mailbox-card-top">
-              <span class="mailbox-title">Email Address</span>
-              <button class="small-copy" type="button" onclick="copyMailboxValue('email')">Copy</button>
-            </div>
-            <p id="mailboxEmail" class="mailbox-value"></p>
-          </div>
-
-          <div class="mailbox-card">
-            <div class="mailbox-card-top">
-              <span class="mailbox-title">Display Name</span>
-              <button class="small-copy" type="button" onclick="copyMailboxValue('display')">Copy</button>
-            </div>
-            <p id="mailboxDisplay" class="mailbox-value"></p>
-          </div>
-
-          <div class="mailbox-card">
-            <div class="mailbox-card-top">
-              <span class="mailbox-title">External Facing (Y/N)</span>
-              <button class="small-copy" type="button" onclick="copyMailboxValue('external')">Copy</button>
-            </div>
-            <p id="mailboxExternal" class="mailbox-value"></p>
-          </div>
-
-          <div class="mailbox-card">
-            <div class="mailbox-card-top">
-              <span class="mailbox-title">ANT Permissions Group</span>
-              <button class="small-copy" type="button" onclick="copyMailboxValue('ant')">Copy</button>
-            </div>
-            <p id="mailboxAnt" class="mailbox-value"></p>
-          </div>
-
-          <div class="mailbox-card">
-            <div class="mailbox-card-top">
-              <span class="mailbox-title">command to baseline the mailbox and confirm it was created successfully</span>
-              <button class="small-copy" type="button" onclick="copyMailboxValue('cmd1')">Copy</button>
-            </div>
-            <p id="mailboxCmd1" class="mailbox-value"></p>
-          </div>
-
-          <div class="mailbox-card">
-            <div class="mailbox-card-top">
-              <span class="mailbox-title">For an internal only (not externally facing)</span>
-              <button class="small-copy" type="button" onclick="copyMailboxValue('cmd2')">Copy</button>
-            </div>
-            <p id="mailboxCmd2" class="mailbox-value"></p>
-            <p class="mailbox-note">Replace full alias. Full alias = text before @amazon.com</p>
-          </div>
-
-          <div class="mailbox-card">
-            <div class="mailbox-card-top">
-              <span class="mailbox-title">For an externally facing alias run</span>
-              <button class="small-copy" type="button" onclick="copyMailboxValue('cmd3')">Copy</button>
-            </div>
-            <p id="mailboxCmd3" class="mailbox-value"></p>
-            <p class="mailbox-note">Replace full alias. Full alias = text before @amazon.com</p>
-          </div>
+    <h2 class="section-title">Extracted Fields</h2>
+    <div class="rows">
+      <div class="row">
+        <div class="row-top">
+          <span class="key">Email Address</span>
+          <button class="copy" data-copy="email">Copy</button>
         </div>
-
-        <div id="mailboxStatus" class="mailbox-status"></div>
+        <p class="val" id="emailVal"></p>
       </div>
-    </details>
 
-    <details>
-      <summary>Windows 11 Performance Optimizer</summary>
-      <pre class="language-powershell" id="script1">Write-Host "Starting Windows 11 performance optimization..." -ForegroundColor Cyan
-<!-- --- .......................................Work Space ...................................................................... -->
-
-# --- Step 1: Clean temporary and cache files ---
-Write-Host "`nCleaning temporary files..." -ForegroundColor Yellow
-$paths = @(
-    "$env:TEMP\*",
-    "$env:WINDIR\Temp\*",
-    "$env:LOCALAPPDATA\Microsoft\Windows\WebCache\*",
-    "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default\Cache\*",
-    "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache\*",
-    "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles\*\cache2\entries\*"
-)
-foreach ($p in $paths) {
-    if (Test-Path $p) {
-        Remove-Item $p -Recurse -Force -ErrorAction SilentlyContinue
-    }
-}
-Write-Host "Temporary and cache files cleaned."
-
-# --- Step 2: Disable unnecessary startup apps ---
-Write-Host "`nDisabling startup apps..." -ForegroundColor Yellow
-try {
-    Get-CimInstance Win32_StartupCommand | ForEach-Object {
-        Write-Host "Disabling startup entry: $($_.Name)"
-        Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name $_.Name -ErrorAction SilentlyContinue
-    }
-} catch {
-    Write-Host "Could not modify startup items. Try running PowerShell as Administrator." -ForegroundColor DarkYellow
-}
-Write-Host "Startup apps disabled (non-critical)."
-
-# --- Step 3: Apply "Adjust for Best Performance" visual settings ---
-Write-Host "`nApplying 'Adjust for Best Performance' settings..." -ForegroundColor Yellow
-
-$visualEffectsKeys = @(
-    "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects",
-    "HKCU:\Software\Microsoft\Windows\DWM",
-    "HKCU:\Control Panel\Desktop",
-    "HKCU:\Control Panel\Desktop\WindowMetrics",
-    "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
-)
-
-foreach ($key in $visualEffectsKeys) {
-    if (!(Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
-}
-
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name VisualFXSetting -Value 2 -ErrorAction SilentlyContinue
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name EnableAeroPeek -Value 0 -ErrorAction SilentlyContinue
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name UseOLEDTaskbarTransparency -Value 0 -ErrorAction SilentlyContinue
-Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name UserPreferencesMask -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0x00,0x00,0x00)) -ErrorAction SilentlyContinue
-Set-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name MinAnimate -Value 0 -ErrorAction SilentlyContinue
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name TaskbarAnimations -Value 0 -ErrorAction SilentlyContinue
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name ListviewAlphaSelect -Value 0 -ErrorAction SilentlyContinue
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name ListviewShadow -Value 0 -ErrorAction SilentlyContinue
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name IconsOnly -Value 1 -ErrorAction SilentlyContinue
-
-Write-Host " 'Adjust for Best Performance' settings applied."
-
-# --- Step 4: Disable background apps ---
-Write-Host "`nDisabling background apps..." -ForegroundColor Yellow
-$regPath2 = "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications"
-if (!(Test-Path $regPath2)) { New-Item -Path $regPath2 -Force | Out-Null }
-Set-ItemProperty -Path $regPath2 -Name "GlobalUserDisabled" -Value 1
-Write-Host "Background apps disabled."
-
-# --- Step 5: Run built-in Windows cleanup tool silently ---
-Write-Host "`nRunning Storage Sense / Disk Cleanup..." -ForegroundColor Yellow
-try {
-    Start-Process cleanmgr.exe -ArgumentList "/sagerun:1" -NoNewWindow -ErrorAction SilentlyContinue
-    Write-Host "Disk Cleanup initiated (if configured with /sageset:1)."
-} catch {
-    Write-Host "Unable to run Disk Cleanup. Configure using 'cleanmgr /sageset:1' first." -ForegroundColor DarkYellow
-}
-
-# --- Step 6: Optimize drives (defrag for HDD / trim for SSD) ---
-Write-Host "`nOptimizing drives..." -ForegroundColor Yellow
-
-Get-Volume |
-    Where-Object { $_.DriveType -eq 'Fixed' -and $_.DriveLetter } |
-    ForEach-Object {
-        Write-Host "Optimizing drive $($_.DriveLetter)..."
-        try {
-            Optimize-Volume -DriveLetter $_.DriveLetter -Verbose -ErrorAction Stop
-        } catch {
-            Write-Host " Could not optimize drive $($_.DriveLetter): $($_.Exception.Message)" -ForegroundColor DarkYellow
-        }
-    }
-
-Write-Host "Drives optimized."
-
-# --- Step 7: Clear Windows update cache (safe cleanup) ---
-Write-Host "`nClearing Windows Update cache..." -ForegroundColor Yellow
-try {
-    net stop wuauserv | Out-Null
-    Remove-Item "C:\Windows\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction SilentlyContinue
-    net start wuauserv | Out-Null
-    Write-Host "Windows Update cache cleared."
-} catch {
-    Write-Host "Could not clear update cache (requires admin)." -ForegroundColor DarkYellow
-}
-
-# --- Step 8: Flush DNS cache ---
-Write-Host "`nFlushing DNS cache..." -ForegroundColor Yellow
-try {
-    ipconfig /flushdns | Out-Null
-    Write-Host "DNS cache flushed."
-} catch {
-    Write-Host "Unable to flush DNS cache." -ForegroundColor DarkYellow
-}
-
-# --- Step 9: Memory optimization (optional) ---
-Write-Host "`nClearing standby memory (RAM)..." -ForegroundColor Yellow
-$emptyStandbyTool = "EmptyStandbyList.exe"
-if (Test-Path $emptyStandbyTool) {
-    Start-Process -FilePath "cmd.exe" -ArgumentList "/c $emptyStandbyTool workingsets" -ErrorAction SilentlyContinue
-    Write-Host "Memory optimized."
-} else {
-    Write-Host "Skipped — EmptyStandbyList.exe not found (optional tool)." -ForegroundColor DarkYellow
-}
-
-# --- Step 10: Completion message ---
-Write-Host "`nAll optimizations completed successfully!" -ForegroundColor Green
-Write-Host "Please restart your computer for all changes to take full effect."</pre>
-      <div class="buttons">
-        <button class="copy-btn" onclick="copyScript('script1')">📋 Copy</button>
-        <button class="download-btn" onclick="downloadScript('script1','Win11_Optimizer.ps1')">⬇️ Download</button>
+      <div class="row">
+        <div class="row-top">
+          <span class="key">Display Name</span>
+          <button class="copy" data-copy="display">Copy</button>
+        </div>
+        <p class="val" id="displayVal"></p>
       </div>
-    </details>
 
-    <details>
-      <summary>Clear DNS, Temp, and Cache</summary>
-      <pre class="language-powershell" id="script2">ipconfig /flushdns
-Remove-Item "$env:TEMP\*" -Recurse -Force
-Clear-RecycleBin -Force</pre>
-      <div class="buttons">
-        <button class="copy-btn" onclick="copyScript('script2')">📋 Copy</button>
-        <button class="download-btn" onclick="downloadScript('script2','ClearDNS_Temp.ps1')">⬇️ Download</button>
+      <div class="row">
+        <div class="row-top">
+          <span class="key">External Facing (Y/N)</span>
+          <button class="copy" data-copy="external">Copy</button>
+        </div>
+        <p class="val" id="externalVal"></p>
       </div>
-    </details>
 
-    <details>
-      <summary>Restart Network Adapters</summary>
-      <pre class="language-powershell" id="script3">Get-NetAdapter | Where-Object {$_.Status -eq 'Up'} | Disable-NetAdapter -Confirm:$false
-Start-Sleep -Seconds 5
-Get-NetAdapter | Enable-NetAdapter -Confirm:$false</pre>
-      <div class="buttons">
-        <button class="copy-btn" onclick="copyScript('script3')">📋 Copy</button>
-        <button class="download-btn" onclick="downloadScript('script3','RestartNetwork.ps1')">⬇️ Download</button>
+      <div class="row">
+        <div class="row-top">
+          <span class="key">ANT Permissions Group</span>
+          <button class="copy" data-copy="ant">Copy</button>
+        </div>
+        <p class="val" id="antVal"></p>
       </div>
-    </details>
-
-    <details>
-      <summary>Check System Health & Disk</summary>
-      <pre class="language-powershell" id="script4">sfc /scannow
-DISM /Online /Cleanup-Image /RestoreHealth
-chkdsk C: /scan</pre>
-      <div class="buttons">
-        <button class="copy-btn" onclick="copyScript('script4')">📋 Copy</button>
-        <button class="download-btn" onclick="downloadScript('script4','SystemHealth.ps1')">⬇️ Download</button>
-      </div>
-    </details>
-
-    <details>
-      <summary>Enable High Performance Power Plan</summary>
-      <pre class="language-powershell" id="script5">powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61
-powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61</pre>
-      <div class="buttons">
-        <button class="copy-btn" onclick="copyScript('script5')">📋 Copy</button>
-        <button class="download-btn" onclick="downloadScript('script5','HighPerformance.ps1')">⬇️ Download</button>
-      </div>
-    </details>
-
-    <details>
-      <summary>Clear DNS, Temp, and Cache (Alternative)</summary>
-      <pre class="language-powershell" id="script6">ipconfig /flushdns
-Remove-Item "$env:TEMP\*" -Recurse -Force
-Clear-RecycleBin -Force</pre>
-      <div class="buttons">
-        <button class="copy-btn" onclick="copyScript('script6')">📋 Copy</button>
-        <button class="download-btn" onclick="downloadScript('script6','ClearDNS_Temp_Alt.ps1')">⬇️ Download</button>
-      </div>
-    </details>
-
-    <details>
-      <summary>xyz troubleshooting</summary>
-      <pre class="language-powershell" id="script7">ipconfig /flushdns
-Remove-Item "$env:TEMP\*" -Recurse -Force
-Clear-RecycleBin -Force</pre>
-      <div class="buttons">
-        <button class="copy-btn" onclick="copyScript('script7')">📋 Copy</button>
-        <button class="download-btn" onclick="downloadScript('script7','xyz_troubleshooting.ps1')">⬇️ Download</button>
-      </div>
-    </details>
-
-    <div class="footer">
-      <div>Click the arrow to expand, copy, or download any script.</div>
-      <div class="author">Created by Ahsan Naseer Khan - ahsmkhan<br>ITS Support Associate II - GSD1 (Team Carm Cyril)</div>
     </div>
-  </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/prism.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/prism-powershell.min.js"></script>
+    <h2 class="section-title">Commands</h2>
+    <div class="commands">
+      <div class="command">
+        <div class="command-top">
+          <span class="cmd-title">command to baseline the mailbox and confirm it was created successfully</span>
+          <button class="copy" data-copy="cmd1">Copy</button>
+        </div>
+        <p class="cmd-text" id="cmd1"></p>
+      </div>
+
+      <div class="command">
+        <div class="command-top">
+          <span class="cmd-title">For an internal only (not externally facing)</span>
+          <button class="copy" data-copy="cmd2">Copy</button>
+        </div>
+        <p class="cmd-text" id="cmd2"></p>
+        <p class="note">Replace full alias. Full alias = text before @amazon.com</p>
+      </div>
+
+      <div class="command">
+        <div class="command-top">
+          <span class="cmd-title">For an externally facing alias run</span>
+          <button class="copy" data-copy="cmd3">Copy</button>
+        </div>
+        <p class="cmd-text" id="cmd3"></p>
+        <p class="note">Replace full alias. Full alias = text before @amazon.com</p>
+      </div>
+    </div>
+
+    <p class="status" id="status"></p>
+  </main>
 
   <script>
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark');
-    }
+    const inputEl = document.getElementById("templateInput");
+    const statusEl = document.getElementById("status");
 
-    function copyScript(id) {
-      const code = document.getElementById(id).innerText;
-      navigator.clipboard.writeText(code).then(() => alert('✅ Script copied!'));
-    }
+    const emailEl = document.getElementById("emailVal");
+    const displayEl = document.getElementById("displayVal");
+    const externalEl = document.getElementById("externalVal");
+    const antEl = document.getElementById("antVal");
 
-    function downloadScript(id, filename) {
-      const code = document.getElementById(id).innerText;
-      const blob = new Blob([code], { type: 'text/plain' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      link.click();
-      URL.revokeObjectURL(link.href);
-    }
+    const cmd1El = document.getElementById("cmd1");
+    const cmd2El = document.getElementById("cmd2");
+    const cmd3El = document.getElementById("cmd3");
 
-    const mailboxState = {
-      email: '',
-      display: '',
-      external: '',
-      ant: '',
-      fullAlias: ''
+    const antUrlInput = document.getElementById("antUrlInput");
+    const extractAntBtn = document.getElementById("extractAntBtn");
+    const copyExtractedBtn = document.getElementById("copyExtractedBtn");
+    const antUrlVal = document.getElementById("antUrlVal");
+    const antUrlNote = document.getElementById("antUrlNote");
+
+    let data = {
+      email: "",
+      display: "",
+      external: "",
+      ant: "",
+      fullAlias: ""
     };
 
-    function pickField(text, regex) {
-      const match = text.match(regex);
-      return match ? match[1].trim() : '';
+    function pick(text, re) {
+      const m = text.match(re);
+      return m ? m[1].trim() : "";
     }
 
-    function parseMailboxTemplate(text) {
-      const email = pickField(text, /^Email Address:\s*(.+)$/im);
-      const display = pickField(text, /^Display Name:\s*(.+)$/im);
-      const external = pickField(text, /^External Facing\s*\(Y\/N\):\s*([YN])$/im);
-      const ant = pickField(text, /^ANT Permissions Group:\s*(.+)$/im);
-      const fullAlias = email.includes('@') ? email.split('@')[0] : '';
+    function parseTemplate(text) {
+      const email = pick(text, /^Email Address:\s*(.+)$/im);
+      const display = pick(text, /^Display Name:\s*(.+)$/im);
+      const external = pick(text, /^External Facing\s*\(Y\/N\):\s*([YN])$/im);
+      const ant = pick(text, /^ANT Permissions Group:\s*(.+)$/im);
+      const fullAlias = email.includes("@") ? email.split("@")[0] : "";
 
-      mailboxState.email = email;
-      mailboxState.display = display;
-      mailboxState.external = external;
-      mailboxState.ant = ant;
-      mailboxState.fullAlias = fullAlias;
+      return { email, display, external, ant, fullAlias };
     }
 
-    function updateMailboxModule() {
-      const input = document.getElementById('mailboxTemplateInput');
-      if (!input) return;
+    function render() {
+      data = parseTemplate(inputEl.value);
 
-      parseMailboxTemplate(input.value);
+      emailEl.textContent = data.email || "-";
+      displayEl.textContent = data.display || "-";
+      externalEl.textContent = data.external || "-";
+      antEl.textContent = data.ant || "-";
 
-      document.getElementById('mailboxEmail').innerText = mailboxState.email || '-';
-      document.getElementById('mailboxDisplay').innerText = mailboxState.display || '-';
-      document.getElementById('mailboxExternal').innerText = mailboxState.external || '-';
-      document.getElementById('mailboxAnt').innerText = mailboxState.ant || '-';
-
-      document.getElementById('mailboxCmd1').innerText = `Get-MailboxInfo -Identity ${mailboxState.email || '<email address>'}`;
-      document.getElementById('mailboxCmd2').innerText = `mda -e --internal-only ${mailboxState.fullAlias || '<FullAlias>'}`;
-      document.getElementById('mailboxCmd3').innerText = `mda -e ${mailboxState.fullAlias || '<FullAlias>'}`;
-
-      document.getElementById('mailboxStatus').innerText = '';
+      cmd1El.textContent = `Get-MailboxInfo -Identity ${data.email || "<email address>"}`;
+      cmd2El.textContent = `mda -e --internal-only ${data.fullAlias || "<FullAlias>"}`;
+      cmd3El.textContent = `mda -e ${data.fullAlias || "<FullAlias>"}`;
+      statusEl.textContent = "";
+      statusEl.classList.remove("error");
     }
 
-    function mailboxValueByType(type) {
-      if (type === 'email') return mailboxState.email;
-      if (type === 'display') return mailboxState.display;
-      if (type === 'external') return mailboxState.external;
-      if (type === 'ant') return mailboxState.ant;
-      if (type === 'cmd1') return document.getElementById('mailboxCmd1').innerText;
-      if (type === 'cmd2') return document.getElementById('mailboxCmd2').innerText;
-      if (type === 'cmd3') return document.getElementById('mailboxCmd3').innerText;
-      return '';
+    function valueByKey(key) {
+      if (key === "email") return data.email;
+      if (key === "display") return data.display;
+      if (key === "external") return data.external;
+      if (key === "ant") return data.ant;
+      if (key === "cmd1") return cmd1El.textContent;
+      if (key === "cmd2") return cmd2El.textContent;
+      if (key === "cmd3") return cmd3El.textContent;
+      return "";
     }
 
-    function copyMailboxValue(type) {
-      const text = mailboxValueByType(type);
-      const status = document.getElementById('mailboxStatus');
+    async function copyText(text) {
+      if (!text || text === "-") {
+        statusEl.textContent = "Nothing to copy.";
+        statusEl.classList.add("error");
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        statusEl.textContent = "Copied to clipboard.";
+        statusEl.classList.remove("error");
+      } catch {
+        statusEl.textContent = "Copy failed. Please copy manually.";
+        statusEl.classList.add("error");
+      }
+    }
 
-      if (!text || text === '-') {
-        status.innerText = 'Nothing to copy.';
+    async function extractAntFromUrl() {
+      const url = antUrlInput.value.trim();
+      antUrlNote.textContent = "";
+
+      if (!url) {
+        antUrlVal.textContent = "-";
+        statusEl.textContent = "Enter a URL first.";
+        statusEl.classList.add("error");
         return;
       }
 
-      navigator.clipboard.writeText(text)
-        .then(() => {
-          status.innerText = 'Copied to clipboard.';
-        })
-        .catch(() => {
-          status.innerText = 'Copy failed. Please copy manually.';
+      extractAntBtn.disabled = true;
+      extractAntBtn.textContent = "Extracting...";
+      statusEl.textContent = "";
+
+      try {
+        const response = await fetch("/api/extract-ant", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url })
         });
+
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) {
+          throw new Error(payload.error || "Failed to extract ANT group.");
+        }
+
+        antUrlVal.textContent = payload.ant_group || "-";
+        antUrlNote.textContent = payload.note || "";
+        antEl.textContent = payload.ant_group || "-";
+        data.ant = payload.ant_group || "";
+
+        statusEl.textContent = "ANT group extracted successfully.";
+        statusEl.classList.remove("error");
+      } catch (err) {
+        antUrlVal.textContent = "-";
+        antUrlNote.textContent = "";
+        statusEl.textContent = err.message || "Failed to extract ANT group.";
+        statusEl.classList.add("error");
+      } finally {
+        extractAntBtn.disabled = false;
+        extractAntBtn.textContent = "Extract";
+      }
     }
 
-    document.getElementById('mailboxTemplateInput').addEventListener('input', updateMailboxModule);
-    updateMailboxModule();
+    document.querySelectorAll("button.copy[data-copy]").forEach((btn) => {
+      btn.addEventListener("click", () => copyText(valueByKey(btn.dataset.copy)));
+    });
+
+    copyExtractedBtn.addEventListener("click", () => copyText(antUrlVal.textContent));
+    extractAntBtn.addEventListener("click", extractAntFromUrl);
+
+    inputEl.addEventListener("input", render);
+    render();
   </script>
 </body>
 </html>

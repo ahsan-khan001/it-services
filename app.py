@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 import requests
@@ -11,6 +12,7 @@ from jinja2 import TemplateNotFound
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
+ROOT_INDEX = Path(BASE_DIR) / "index.html"
 
 # Matches team names in paths like /a/team/<group-name>
 TEAM_PATH_PATTERN = re.compile(r"/a/team/([^/?#]+)")
@@ -102,7 +104,9 @@ def index():
     try:
         return render_template("index.html")
     except TemplateNotFound:
-        return "Template missing: templates/index.html", 500
+        if ROOT_INDEX.exists():
+            return ROOT_INDEX.read_text(encoding="utf-8")
+        return "Template missing: upload templates/index.html (or index.html)", 500
 
 
 @app.route("/api/extract-ant", methods=["POST"])
