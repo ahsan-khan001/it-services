@@ -97,6 +97,9 @@
 Display Name: pvtechevents
 External Facing (Y/N): N
 ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?target=64746294)</textarea>
+    <p style="margin:10px 0 0;">
+      <button class="action" id="extractFromTemplateBtn" type="button">Extract ANT From Template</button>
+    </p>
 
     <h2 class="section-title">Extracted Fields</h2>
     <div class="rows">
@@ -177,6 +180,7 @@ ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?
     const cmd1El = document.getElementById("cmd1");
     const cmd2El = document.getElementById("cmd2");
     const cmd3El = document.getElementById("cmd3");
+    const extractFromTemplateBtn = document.getElementById("extractFromTemplateBtn");
 
     let data = {
       email: "",
@@ -219,7 +223,9 @@ ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?
         });
         const payload = await response.json();
         if (currentId !== antRequestId) return;
-        if (!response.ok || !payload.ok) return;
+        if (!response.ok || !payload.ok) {
+          throw new Error(payload.error || "Failed to extract ANT group.");
+        }
         data.ant = payload.ant_group || data.ant;
         antEl.textContent = data.ant || "-";
         statusEl.textContent = payload.note || "ANT group extracted successfully.";
@@ -232,6 +238,29 @@ ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?
       }
     }
 
+    async function extractAntFromTemplate() {
+      data = parseTemplate(inputEl.value);
+      emailEl.textContent = data.email || "-";
+      displayEl.textContent = data.display || "-";
+      externalEl.textContent = data.external || "-";
+      antEl.textContent = data.ant || "-";
+
+      if (!data.antUrl) {
+        statusEl.textContent = "No ANT URL found in 'ANT Permissions Group' line.";
+        statusEl.classList.add("error");
+        return;
+      }
+
+      extractFromTemplateBtn.disabled = true;
+      extractFromTemplateBtn.textContent = "Extracting...";
+      try {
+        await resolveAntFromTemplateUrl(data.antUrl);
+      } finally {
+        extractFromTemplateBtn.disabled = false;
+        extractFromTemplateBtn.textContent = "Extract ANT From Template";
+      }
+    }
+
     function render() {
       data = parseTemplate(inputEl.value);
 
@@ -239,9 +268,6 @@ ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?
       displayEl.textContent = data.display || "-";
       externalEl.textContent = data.external || "-";
       antEl.textContent = data.ant || "-";
-      if (data.antUrl) {
-        resolveAntFromTemplateUrl(data.antUrl);
-      }
 
       cmd1El.textContent = `Get-MailboxInfo -Identity ${data.email || "<email address>"}`;
       cmd2El.textContent = `mda -e --internal-only ${data.fullAlias || "<FullAlias>"}`;
@@ -281,6 +307,7 @@ ANT Permissions Group: pvtechevents (https://permissions.amazon.com/group.mhtml?
       btn.addEventListener("click", () => copyText(valueByKey(btn.dataset.copy)));
     });
 
+    extractFromTemplateBtn.addEventListener("click", extractAntFromTemplate);
     inputEl.addEventListener("input", render);
     render();
   </script>
